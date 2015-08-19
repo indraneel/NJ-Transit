@@ -2,7 +2,8 @@ import requests
 import scrapy
 import re
 
-stops = ["","AM","AB","AZ","AH","AS","AN","AP","AO","AC","AV","BI","BH","MC","BS","BY","BV","BM","BN","BK","BB","BU","BW","BF","CB","CM","CY","IF","CN","XC","DL","DV","DO","DN","EO","ED","EH","EL","EZ","EN","EX","FW","FH","GD","GW","GI","GL","GG","GK","RS","HQ","HL","HN","RM","HW","HZ","HG","HI","HD","UF","HB","JA","KG","HP","ON","LP","LI","LW","FA","LS","LB","LN","LY","MA","MZ","SQ","MW","MP","MU","MI","MD","MB","GO","MK","HS","UV","ZM","MX","MR","HV","OL","TB","MS","ML","MT","MV","MH","NN","NT","NE","NH","NB","NV","NY","NA","ND","NP","OR","NZ","OD","OG","OS","PV","PS","RN","PC","PQ","PN","PE","PH","PF","PL","PP","PO","PR","PJ","FZ","RH","RY","17","RA","RB","RW","RG","RL","RF","CW","TS","SE","RT","XG","SM","CH","SO","LA","SV","SG","SF","ST","TE","TO","TR","TC","US","UM","WK","WA","WG","WT","23","WF","WW","WH","WR","WB","WL"]
+stops = ["NB"]
+# stops = ["AM","AB","AZ","AH","AS","AN","AP","AO","AC","AV","BI","BH","MC","BS","BY","BV","BM","BN","BK","BB","BU","BW","BF","CB","CM","CY","IF","CN","XC","DL","DV","DO","DN","EO","ED","EH","EL","EZ","EN","EX","FW","FH","GD","GW","GI","GL","GG","GK","RS","HQ","HL","HN","RM","HW","HZ","HG","HI","HD","UF","HB","JA","KG","HP","ON","LP","LI","LW","FA","LS","LB","LN","LY","MA","MZ","SQ","MW","MP","MU","MI","MD","MB","GO","MK","HS","UV","ZM","MX","MR","HV","OL","TB","MS","ML","MT","MV","MH","NN","NT","NE","NH","NB","NV","NY","NA","ND","NP","OR","NZ","OD","OG","OS","PV","PS","RN","PC","PQ","PN","PE","PH","PF","PL","PP","PO","PR","PJ","FZ","RH","RY","17","RA","RB","RW","RG","RL","RF","CW","TS","SE","RT","XG","SM","CH","SO","LA","SV","SG","SF","ST","TE","TO","TR","TC","US","UM","WK","WA","WG","WT","23","WF","WW","WH","WR","WB","WL"]
 
 class TrainSpider(scrapy.Spider):
     name = 'njtransit'
@@ -12,7 +13,9 @@ class TrainSpider(scrapy.Spider):
 	base_url = 'http://dv.njtransit.com/mobile/tid-mobile.aspx?sid='
 	for stop in stops:
 	    new_url = base_url + str(stop)
-	    yield scrapy.http.Request(new_url, callback=self.parse)
+	    stop_request = scrapy.http.Request(new_url, callback=self.parse)
+	    stop_request.meta['stop'] = stop
+	    yield stop_request
 
 
     def parse(self, response):
@@ -40,4 +43,13 @@ class TrainSpider(scrapy.Spider):
 		temp_row.append(str(col))
 		# print temp_row
 	    output.append(temp_row)
+	    single_train_url = "http://dv.njtransit.com/mobile/train_stops.aspx?sid=" + response.meta['stop'] + "&train=" + str(temp_row[4])
+	    # yield scrapy.http.Request(single_train_url, callback=self.single_train)
+
 	print output
+
+    def single_train(self, response):
+	for tr in response.css("#table_stops"):
+	    row = tr.css('::text').extract()
+	    row  = [r.encode('utf-8') for r in row]
+	    print row
