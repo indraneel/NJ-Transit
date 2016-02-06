@@ -104,8 +104,9 @@ for s in stops:
 	    num_error += 1
 	    if con:
 		con.rollback()
-		with open("errors.txt", "a") as errorlog:
-		    errorlog.write(str(datetime.datetime.now()) + "\t| default |\t",response,"\t|\t",e,"\n")
+		with open("./errors.txt", "a") as errorlog:
+		    outstring = str(datetime.datetime.now()) + "\t| default |\t"+str(response)+"\t|\t"+e+"\n"
+		    errorlog.write(outstring)
 
 	
     if isinstance(response['ITEMS']['ITEM'], dict):
@@ -147,8 +148,9 @@ for s in stops:
 	    num_error += 1
 	    if con:
 		con.rollback()
-		with open("errors.txt", "a") as errorlog:
-		    errorlog.write(str(datetime.datetime.now()) + "\t| dict |\t",temp_item,"\t|\t",e,"\n")
+		with open("./errors.txt", "a") as errorlog:
+		    outstring = (str(datetime.datetime.now()) + "\t| dict |\t"+str(temp_item)+"\t|\t"+e+"\n")
+		    errorlog.write(outstring)
 
 
     if isinstance(response['ITEMS']['ITEM'], list):
@@ -190,8 +192,9 @@ for s in stops:
 		num_error += 1
 		if con:
 		    con.rollback()
-		    with open("errors.txt", "a") as errorlog:
-			errorlog.write(str(datetime.datetime.now()) + "\t| list |\t",temp_item,"\t|\t",e,"\n")
+		    with open("./errors.txt", "a") as errorlog:
+			outstring = str(datetime.datetime.now()) + "\t| list |\t"+str(temp_item)+"\t|\t"+e+"\n"
+			errorlog.write(outstring)
 
 
 
@@ -204,6 +207,7 @@ try:
     cur.execute("INSERT INTO ingestion_stats(successes, errors) VALUES(%(successes)s, %(errors)s)", ingestion_stats)
     con.commit()
 except Exception, e:
-    with open("stat_error.txt", "a") as staterrorlog:
-	staterrorlog.write(str(datetime.datetime.now()) + "\t| stats |\t",str(ingestion_stats),"\t|\t",e,"\n")
+    with open("./stat_error.txt", "a") as staterrorlog:
+	outstring = str(datetime.datetime.now()) + "\t| stats |\t"+str(ingestion_stats)+"\t|\t"+e+"\n"
+	staterrorlog.write(outstring)
     
